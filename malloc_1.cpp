@@ -7,7 +7,7 @@ void* malloc(size_t size) {
     if (size == 0 || size > MAX_MALLOC_SIZE) {
         return NULL;
     }
-    void*  increment = &size;
+    intptr_t increment = size;
     void* prev_program_break = sbrk(increment);
 
     if (*(int*)prev_program_break < 0) {
