@@ -12,6 +12,7 @@ typedef struct Meta_Data_t {
 } Meta_Data;
 
 Meta_Data *global_list = NULL;
+Meta_Data *global_list_init = NULL;
 
 #define MAX_MALLOC_SIZE 100000000
 #define META_SIZE       sizeof(Meta_Data)
@@ -24,7 +25,8 @@ void *malloc(size_t size) {
 
     intptr_t increment = META_SIZE + size;
 
-    if (global_list != NULL) {
+    if (global_list_init != NULL) {
+        global_list = global_list_init;
         while (global_list->m_next != NULL) {
             if (global_list->m_is_free && global_list->m_init_allocation >= size) {
                 global_list->m_requested_allocation = size;
@@ -47,14 +49,15 @@ void *malloc(size_t size) {
     Meta_Data m = {size, size, false, NULL};
 
     // put in global list.
-    Meta_Data* global_list_temp = global_list;
-    if (global_list_temp == NULL) {
-        global_list_temp = (Meta_Data *) prev_program_break;
+    if (global_list_init == NULL) {
+        global_list = (Meta_Data *) prev_program_break;
+        global_list_init = (Meta_Data *) prev_program_break;
     } else {
-        while (global_list_temp->m_next != NULL) {
-            global_list_temp= global_list_temp->m_next;
+        global_list = global_list_init;
+        while (global_list->m_next != NULL) {
+            global_list = global_list->m_next;
         }
-        global_list_temp->m_next = (Meta_Data *) prev_program_break;
+        global_list->m_next = (Meta_Data *) prev_program_break;
     }
 
     // put in heap area.
@@ -123,18 +126,18 @@ void *realloc(void *oldp, size_t size) {
 
 size_t _num_free_blocks() {
     size_t counter = 0;
-    Meta_Data* global_list_temp = global_list;
-    if (global_list_temp == NULL) {
+    if (global_list_init == NULL) {
         return 0;
     }
-    while (global_list_temp->m_next != NULL) {
-        if (global_list_temp->m_is_free) {
+    global_list = global_list_init;
+    while (global_list->m_next != NULL) {
+        if (global_list->m_is_free) {
             counter++;
         }
-        global_list_temp = global_list_temp->m_next;
+        global_list = global_list->m_next;
     }
 
-    if (global_list_temp->m_is_free) {
+    if (global_list->m_is_free) {
         counter++;
     }
     return counter;
@@ -142,19 +145,20 @@ size_t _num_free_blocks() {
 
 size_t _num_free_bytes() {
     size_t counter = 0;
-    Meta_Data* global_list_temp = global_list;
-    if (global_list_temp == NULL) {
+    if (global_list_init == NULL) {
         return 0;
     }
-    while (global_list_temp->m_next != NULL) {
-        if (global_list_temp->m_is_free) {
-            counter += global_list_temp->m_init_allocation;
+
+    global_list = global_list_init;
+    while (global_list->m_next != NULL) {
+        if (global_list->m_is_free) {
+            counter += global_list->m_init_allocation;
         }
-        global_list_temp = global_list_temp->m_next;
+        global_list = global_list->m_next;
     }
 
-    if (global_list_temp->m_is_free) {
-        counter += global_list_temp->m_init_allocation;
+    if (global_list->m_is_free) {
+        counter += global_list->m_init_allocation;
     }
 
     return counter;
@@ -162,18 +166,19 @@ size_t _num_free_bytes() {
 
 size_t _num_allocated_blocks() {
     size_t counter = 0;
-    Meta_Data* global_list_temp = global_list;
-    if (global_list_temp== NULL) {
+    if (global_list_init == NULL) {
         return 0;
     }
-    while (global_list_temp->m_next != NULL) {
-        if (!global_list_temp->m_is_free) {
+
+    global_list = global_list_init;
+    while (global_list->m_next != NULL) {
+        if (!global_list->m_is_free) {
             counter++;
         }
-        global_list_temp = global_list_temp->m_next;
+        global_list = global_list->m_next;
     }
 
-    if (!global_list_temp->m_is_free) {
+    if (!global_list->m_is_free) {
         counter++;
     }
 
@@ -183,19 +188,20 @@ size_t _num_allocated_blocks() {
 
 size_t _num_allocated_bytes() {
     size_t counter = 0;
-    Meta_Data* global_list_temp = global_list;
-    if (global_list_temp == NULL) {
+    if (global_list_init == NULL) {
         return 0;
     }
-    while (global_list_temp->m_next != NULL) {
-        if (!global_list_temp->m_is_free) {
-            counter += global_list_temp->m_init_allocation;
+
+    global_list = global_list_init;
+    while (global_list->m_next != NULL) {
+        if (!global_list->m_is_free) {
+            counter += global_list->m_init_allocation;
         }
-        global_list_temp = global_list_temp->m_next;
+        global_list = global_list->m_next;
     }
 
-    if (!global_list_temp->m_is_free) {
-        counter += global_list_temp->m_init_allocation;
+    if (!global_list->m_is_free) {
+        counter += global_list->m_init_allocation;
     }
 
     return counter;
