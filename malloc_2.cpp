@@ -131,6 +131,10 @@ size_t _num_free_blocks() {
         }
         global_list = global_list->m_next;
     }
+
+    if (global_list->m_is_free) {
+        counter++;
+    }
     return counter;
 }
 
@@ -145,6 +149,11 @@ size_t _num_free_bytes() {
         }
         global_list = global_list->m_next;
     }
+
+    if (global_list->m_is_free) {
+        counter += global_list->m_init_allocation;
+    }
+
     return counter;
 }
 
@@ -159,6 +168,11 @@ size_t _num_allocated_blocks() {
         }
         global_list = global_list->m_next;
     }
+
+    if (!global_list->m_is_free) {
+        counter++;
+    }
+
     return counter;
 }
 
@@ -174,19 +188,21 @@ size_t _num_allocated_bytes() {
         }
         global_list = global_list->m_next;
     }
+
+    if (!global_list->m_is_free) {
+        counter += global_list->m_init_allocation;
+    }
+
     return counter;
 }
 
-
 size_t _num_meta_data_bytes() {
-    return META_SIZE*(_num_allocated_blocks() + _num_free_blocks());
+    return META_SIZE * (_num_allocated_blocks() + _num_free_blocks());
 }
 
 size_t _size_meta_data() {
     return META_SIZE;
 }
-
-
 
 
 int main() {
