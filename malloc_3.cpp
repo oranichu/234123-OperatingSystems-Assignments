@@ -108,6 +108,13 @@ void free(void *p) {
 
     meta_beginning->m_is_free = true;
 
+    Meta_Data *next = meta_beginning->m_next;
+    if (next != NULL) {
+        if (next->m_is_free) {
+            meta_beginning->m_init_allocation += META_SIZE + next->m_init_allocation;
+            meta_beginning->m_next = next->m_next;
+        }
+    }
 }
 
 void *realloc(void *oldp, size_t size) {
