@@ -11,6 +11,13 @@ typedef struct Meta_Data_t {
 
 } Meta_Data;
 
+enum BlockInfo {
+    FREE_BLOCKS,
+    FREE_BYTES,
+    ALLOC_BLOCKS,
+    ALLOC_BYTES
+};
+
 Meta_Data *global_list = NULL;
 Meta_Data *global_list_init = NULL;
 
@@ -150,72 +157,56 @@ void *realloc(void *oldp, size_t size) {
 
 }
 
-size_t _num_free_blocks() {
-    size_t counter = 0;
+size_t _get_blocks_info(BlockInfo b) {
     if (global_list_init == NULL) {
         return 0;
     }
+
+    size_t free_block_counter = 0;
+    size_t free_bytes_counter = 0;
+    size_t alloc_block_counter = 0;
+    size_t alloc_bytes_counter = 0;
+
     global_list = global_list_init;
     while (global_list != NULL) {
         if (global_list->m_is_free) {
-            counter++;
+            free_block_counter++;
+            free_bytes_counter += global_list->m_init_allocation;
+        } else {
+            alloc_block_counter++;
+            alloc_bytes_counter += global_list->m_init_allocation;
         }
         global_list = global_list->m_next;
     }
 
-    return counter;
+    switch (b) {
+        case FREE_BLOCKS  :
+            return free_block_counter;
+        case FREE_BYTES   :
+            return free_bytes_counter;
+        case ALLOC_BLOCKS :
+            return alloc_block_counter;
+        case ALLOC_BYTES  :
+            return alloc_bytes_counter;
+
+    }
+
+}
+
+size_t _num_free_blocks() {
+    return _get_blocks_info(FREE_BLOCKS);
 }
 
 size_t _num_free_bytes() {
-    size_t counter = 0;
-    if (global_list_init == NULL) {
-        return 0;
-    }
-
-    global_list = global_list_init;
-    while (global_list != NULL) {
-        if (global_list->m_is_free) {
-            counter += global_list->m_init_allocation;
-        }
-        global_list = global_list->m_next;
-    }
-
-    return counter;
+        return _get_blocks_info(FREE_BYTES);
 }
 
 size_t _num_allocated_blocks() {
-    size_t counter = 0;
-    if (global_list_init == NULL) {
-        return 0;
-    }
-
-    global_list = global_list_init;
-    while (global_list != NULL) {
-        if (!global_list->m_is_free) {
-            counter++;
-        }
-        global_list = global_list->m_next;
-    }
-
-    return counter;
+       return _get_blocks_info(ALLOC_BLOCKS);
 }
 
-
 size_t _num_allocated_bytes() {
-    size_t counter = 0;
-    if (global_list_init == NULL) {
-        return 0;
-    }
-
-    global_list = global_list_init;
-    while (global_list != NULL) {
-        if (!global_list->m_is_free) {
-            counter += global_list->m_init_allocation;
-        }
-        global_list = global_list->m_next;
-    }
-
-    return counter;
+   return _get_blocks_info(ALLOC_BYTES);
 }
 
 size_t _num_meta_data_bytes() {
