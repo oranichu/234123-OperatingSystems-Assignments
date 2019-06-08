@@ -42,6 +42,7 @@ void *malloc(size_t size) {
             return (void *) ((Meta_Data *) global_list + 1);
 
         }
+    }
 
     void *prev_program_break = sbrk(increment);
 
@@ -225,7 +226,82 @@ size_t _size_meta_data() {
 int main() {
     assert(malloc(0) == NULL);
     assert(malloc(MAX_MALLOC_SIZE + 1) == NULL);
-    void *omer = malloc(100);
-    assert(omer != NULL);
+
+    void *omer;
+    omer = malloc(100);
+    assert(_num_allocated_blocks() == 1);
+    assert(_num_free_blocks() == 0);
+    assert(_num_allocated_bytes() == 100);
+    assert(_num_meta_data_bytes() == META_SIZE);
+    assert(_num_free_bytes() == 0);
+
+    free(omer);
+    assert(_num_allocated_blocks() == 0);
+    assert(_num_free_blocks() == 1);
+    omer = malloc(50);
+    assert(_num_allocated_blocks() == 1);
+    assert(_num_free_blocks() == 0);
+
+    free(omer);
+    assert(_num_allocated_blocks() == 0);
+    assert(_num_free_blocks() == 1);
+    omer = malloc(70);
+    assert(_num_allocated_blocks() == 1);
+    assert(_num_free_blocks() == 0);
+
+    free(omer);
+    assert(_num_allocated_blocks() == 0);
+    assert(_num_free_blocks() == 1);
+    omer = malloc(101);
+    assert(_num_allocated_blocks() == 1);
+    assert(_num_free_blocks() == 1);
+
+    omer = malloc(70);
+    assert(_num_allocated_blocks() == 2);
+    assert(_num_free_blocks() == 0);
+
+    void *omer2 = malloc(50);
+
+    omer2 = malloc(70);
+    omer = malloc(70);
+    omer = malloc(70);
+
+    assert(_num_allocated_blocks() == 6);
+    assert(_num_free_blocks() == 0);
+
+    free(omer2);
+    assert(_num_allocated_blocks() == 5);
+    assert(_num_free_blocks() == 1);
+
+    omer2 = malloc(110);
+    assert(_num_allocated_blocks() == 6);
+    assert(_num_free_blocks() == 1);
+
+    omer2 = malloc(69);
+    assert(_num_allocated_blocks() == 7);
+    assert(_num_free_blocks() == 0);
+
+    char *omer3 = (char *) calloc(50);
+    assert(_num_allocated_blocks() == 8);
+    assert(_num_free_blocks() == 0);
+    for (int i = 0; i < 50; ++i) {
+        assert(omer3[i] == 0);
+        omer3[i] = i;
+    }
+
+    char *omer4 = (char *) realloc(omer3, 100);
+    assert(_num_allocated_blocks() == 8);
+    assert(_num_free_blocks() == 1);
+    for (int j = 0; j < 50; ++j) {
+        assert(omer4[j] == j);
+    }
+
+    omer3 = (char*)malloc(30);
+    assert(_num_allocated_blocks() == 9);
+    assert(_num_free_blocks() == 0);
+    omer4 = (char*)realloc(omer3, 40);
+    assert(_num_allocated_blocks() == 9);
+    assert(_num_free_blocks() == 0);
+
     return 0;
 }
