@@ -87,7 +87,7 @@ void free(void *p) {
 
 }
 
-void* realloc(void* oldp, size_t size) {
+void *realloc(void *oldp, size_t size) {
 
     if (size == 0 || size > MAX_MALLOC_SIZE) {
         return NULL;
@@ -119,6 +119,73 @@ void* realloc(void* oldp, size_t size) {
     return ptr;
 
 }
+
+size_t _num_free_blocks() {
+    size_t counter = 0;
+    if (global_list == NULL) {
+        return 0;
+    }
+    while (global_list->m_next != NULL) {
+        if (global_list->m_is_free) {
+            counter++;
+        }
+        global_list = global_list->m_next;
+    }
+    return counter;
+}
+
+size_t _num_free_bytes() {
+    size_t counter = 0;
+    if (global_list == NULL) {
+        return 0;
+    }
+    while (global_list->m_next != NULL) {
+        if (global_list->m_is_free) {
+            counter += global_list->m_init_allocation;
+        }
+        global_list = global_list->m_next;
+    }
+    return counter;
+}
+
+size_t _num_allocated_blocks() {
+    size_t counter = 0;
+    if (global_list == NULL) {
+        return 0;
+    }
+    while (global_list->m_next != NULL) {
+        if (!global_list->m_is_free) {
+            counter++;
+        }
+        global_list = global_list->m_next;
+    }
+    return counter;
+}
+
+
+size_t _num_allocated_bytes() {
+    size_t counter = 0;
+    if (global_list == NULL) {
+        return 0;
+    }
+    while (global_list->m_next != NULL) {
+        if (!global_list->m_is_free) {
+            counter += global_list->m_init_allocation;
+        }
+        global_list = global_list->m_next;
+    }
+    return counter;
+}
+
+
+size_t _num_meta_data_bytes() {
+    return META_SIZE*(_num_allocated_blocks() + _num_free_blocks());
+}
+
+size_t _size_meta_data() {
+    return META_SIZE;
+}
+
 
 
 
