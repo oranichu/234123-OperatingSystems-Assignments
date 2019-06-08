@@ -25,6 +25,7 @@ void *malloc(size_t size) {
 
     intptr_t increment = META_SIZE + size;
 
+    // trying to use freed memory
     if (global_list_init != NULL) {
         global_list = global_list_init;
         while (global_list->m_next != NULL) {
