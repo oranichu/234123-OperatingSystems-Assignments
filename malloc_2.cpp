@@ -35,7 +35,13 @@ void *malloc(size_t size) {
             }
             global_list = global_list->m_next;
         }
-    }
+
+        if (global_list->m_is_free && global_list->m_init_allocation >= size) {
+            global_list->m_requested_allocation = size;
+            global_list->m_is_free = false;
+            return (void *) ((Meta_Data *) global_list + 1);
+
+        }
 
     void *prev_program_break = sbrk(increment);
 
