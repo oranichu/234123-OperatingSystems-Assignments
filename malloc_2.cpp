@@ -1,6 +1,8 @@
 #include <iostream>
 #include <unistd.h>
-#import <stdlib.h>
+#include <string.h>
+#include <stdlib.h>
+#include <assert.h>
 
 typedef struct Meta_Data_t {
 
@@ -132,177 +134,62 @@ void *realloc(void *oldp, size_t size) {
 
 }
 
-size_t _num_free_blocks() {
-    size_t counter = 0;
+size_t _get_blocks_info(BlockInfo b) {
     if (global_list_init == NULL) {
         return 0;
     }
+
+    size_t free_block_counter = 0;
+    size_t free_bytes_counter = 0;
+    size_t alloc_block_counter = 0;
+    size_t alloc_bytes_counter = 0;
+
     global_list = global_list_init;
-    while (global_list->m_next != NULL) {
+    while (global_list != NULL) {
         if (global_list->m_is_free) {
-            counter++;
+            free_block_counter++;
+            free_bytes_counter += global_list->m_init_allocation;
+        } else {
+            alloc_block_counter++;
+            alloc_bytes_counter += global_list->m_init_allocation;
         }
         global_list = global_list->m_next;
     }
 
-    if (global_list->m_is_free) {
-        counter++;
+    switch (b) {
+        case FREE_BLOCKS  :
+            return free_block_counter;
+        case FREE_BYTES   :
+            return free_bytes_counter;
+        case ALLOC_BLOCKS :
+            return alloc_block_counter;
+        case ALLOC_BYTES  :
+            return alloc_bytes_counter;
+
     }
-    return counter;
+
+}
+
+size_t _num_free_blocks() {
+    return _get_blocks_info(FREE_BLOCKS);
 }
 
 size_t _num_free_bytes() {
-    size_t counter = 0;
-    if (global_list_init == NULL) {
-        return 0;
-    }
-
-    global_list = global_list_init;
-    while (global_list->m_next != NULL) {
-        if (global_list->m_is_free) {
-            counter += global_list->m_init_allocation;
-        }
-        global_list = global_list->m_next;
-    }
-
-    if (global_list->m_is_free) {
-        counter += global_list->m_init_allocation;
-    }
-
-    return counter;
+    return _get_blocks_info(FREE_BYTES);
 }
 
 size_t _num_allocated_blocks() {
-    size_t counter = 0;
-    if (global_list_init == NULL) {
-        return 0;
-    }
-
-    global_list = global_list_init;
-    while (global_list->m_next != NULL) {
-        if (!global_list->m_is_free) {
-            counter++;
-        }
-        global_list = global_list->m_next;
-    }
-
-    if (!global_list->m_is_free) {
-        counter++;
-    }
-
-    return counter;
+    return _get_blocks_info(ALLOC_BLOCKS) + _get_blocks_info(FREE_BLOCKS);
 }
 
-
 size_t _num_allocated_bytes() {
-    size_t counter = 0;
-    if (global_list_init == NULL) {
-        return 0;
-    }
-
-    global_list = global_list_init;
-    while (global_list->m_next != NULL) {
-        if (!global_list->m_is_free) {
-            counter += global_list->m_init_allocation;
-        }
-        global_list = global_list->m_next;
-    }
-
-    if (!global_list->m_is_free) {
-        counter += global_list->m_init_allocation;
-    }
-
-    return counter;
+    return _get_blocks_info(ALLOC_BYTES) + _get_blocks_info(FREE_BYTES);
 }
 
 size_t _num_meta_data_bytes() {
-    return META_SIZE * (_num_allocated_blocks() + _num_free_blocks());
+    return META_SIZE * (_num_allocated_blocks());
 }
 
 size_t _size_meta_data() {
     return META_SIZE;
-}
-
-
-int main() {
-    assert(malloc(0) == NULL);
-    assert(malloc(MAX_MALLOC_SIZE + 1) == NULL);
-
-    void *omer;
-    omer = malloc(100);
-    assert(_num_allocated_blocks() == 1);
-    assert(_num_free_blocks() == 0);
-    assert(_num_allocated_bytes() == 100);
-    assert(_num_meta_data_bytes() == META_SIZE);
-    assert(_num_free_bytes() == 0);
-
-    free(omer);
-    assert(_num_allocated_blocks() == 0);
-    assert(_num_free_blocks() == 1);
-    omer = malloc(50);
-    assert(_num_allocated_blocks() == 1);
-    assert(_num_free_blocks() == 0);
-
-    free(omer);
-    assert(_num_allocated_blocks() == 0);
-    assert(_num_free_blocks() == 1);
-    omer = malloc(70);
-    assert(_num_allocated_blocks() == 1);
-    assert(_num_free_blocks() == 0);
-
-    free(omer);
-    assert(_num_allocated_blocks() == 0);
-    assert(_num_free_blocks() == 1);
-    omer = malloc(101);
-    assert(_num_allocated_blocks() == 1);
-    assert(_num_free_blocks() == 1);
-
-    omer = malloc(70);
-    assert(_num_allocated_blocks() == 2);
-    assert(_num_free_blocks() == 0);
-
-    void *omer2 = malloc(50);
-
-    omer2 = malloc(70);
-    omer = malloc(70);
-    omer = malloc(70);
-
-    assert(_num_allocated_blocks() == 6);
-    assert(_num_free_blocks() == 0);
-
-    free(omer2);
-    assert(_num_allocated_blocks() == 5);
-    assert(_num_free_blocks() == 1);
-
-    omer2 = malloc(110);
-    assert(_num_allocated_blocks() == 6);
-    assert(_num_free_blocks() == 1);
-
-    omer2 = malloc(69);
-    assert(_num_allocated_blocks() == 7);
-    assert(_num_free_blocks() == 0);
-
-    char *omer3 = (char *) calloc(50);
-    assert(_num_allocated_blocks() == 8);
-    assert(_num_free_blocks() == 0);
-    for (int i = 0; i < 50; ++i) {
-        assert(omer3[i] == 0);
-        omer3[i] = i;
-    }
-
-    char *omer4 = (char *) realloc(omer3, 100);
-    assert(_num_allocated_blocks() == 8);
-    assert(_num_free_blocks() == 1);
-    for (int j = 0; j < 50; ++j) {
-        assert(omer4[j] == j);
-    }
-
-    omer3 = (char*)malloc(30);
-    assert(_num_allocated_blocks() == 9);
-    assert(_num_free_blocks() == 0);
-    omer4 = (char*)realloc(omer3, 40);
-    assert(_num_allocated_blocks() == 9);
-    assert(_num_free_blocks() == 0);
-
-    return 0;
 }
