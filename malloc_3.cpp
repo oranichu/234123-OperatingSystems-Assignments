@@ -140,9 +140,9 @@ void *malloc(size_t size) {
 
 }
 
-void *calloc(size_t size) {
+void *calloc(size_t num, size_t size) {
 
-    void *ptr = malloc(size);
+    void *ptr = malloc(size * num);
     if (ptr == NULL) {
         return NULL;
     }

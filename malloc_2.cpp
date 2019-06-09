@@ -77,7 +77,7 @@ void *malloc(size_t size) {
 
 }
 
-void *calloc(size_t size) {
+void *calloc(size_t num, size_t size) {
 
     void *ptr = malloc(size);
     if (ptr == NULL) {
