@@ -13,6 +13,13 @@ typedef struct Meta_Data_t {
 
 } Meta_Data;
 
+enum BlockInfo {
+    FREE_BLOCKS,
+    FREE_BYTES,
+    ALLOC_BLOCKS,
+    ALLOC_BYTES
+};
+
 Meta_Data *global_list = NULL;
 Meta_Data *global_list_init = NULL;
 

@@ -278,7 +278,7 @@ size_t _size_meta_data() {
     return META_SIZE;
 }
 
-
+/*
 int main() {
 
     global_list_init = NULL;
@@ -354,7 +354,7 @@ int main() {
     assert(_num_meta_data_bytes() == 6 * META_SIZE);
 
     // checking if free combine works on the other way.
-    // (a a f a a a /*free b4*/ a a f f a a /*combine b3 and b4*/ a a f a a)
+    // (a a f a a a /free b4/ a a f f a a /combine b3 and b4/ a a f a a)
     free(b4);
     assert(_num_free_blocks() == 1);
     assert(_num_free_bytes() == 7000 + META_SIZE);
@@ -474,3 +474,4 @@ int main() {
 
     return 0;
 }
+*/
