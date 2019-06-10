@@ -678,6 +678,7 @@ void malloc3_test_03() {
 }
 
 int main() {
+    global_list_init = NULL;
     malloc3_test_01();
     malloc3_test_02();
     malloc3_test_03();

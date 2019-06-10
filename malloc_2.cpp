@@ -202,7 +202,6 @@ size_t _size_meta_data() {
 }
 
 void malloc2_test_01() {
-
     // malloc
     int *ten = (int *) malloc(sizeof(int) * 10);
     assert(ten);
@@ -277,6 +276,7 @@ void malloc2_test_01() {
 }
 
 int main() {
+    global_list_init = NULL;
     malloc2_test_01();
     return 0;
 }
