@@ -22,7 +22,7 @@ enum BlockInfo {
 };
 
 Meta_Data *global_list = NULL;
-Meta_Data *global_list_init = NULL;
+void *global_list_init = nullptr;
 Meta_Data *global_list_end = NULL;
 
 #define MAX_MALLOC_SIZE   100000000
@@ -53,7 +53,7 @@ void *malloc(size_t size) {
 
     // trying to use freed memory
     if (global_list_init != NULL) {
-        global_list = global_list_init;
+        global_list = (Meta_Data*)global_list_init;
         while (global_list != NULL) {
             if (global_list->m_is_free && global_list->m_init_allocation >= size) {
                 global_list->m_requested_allocation = size;
@@ -120,9 +120,9 @@ void *malloc(size_t size) {
     // put in global list.
     if (global_list_init == NULL) {
         global_list = (Meta_Data *) prev_program_break;
-        global_list_init = (Meta_Data *) prev_program_break;
+        global_list_init = prev_program_break;
     } else {
-        global_list = global_list_init;
+        global_list = (Meta_Data*)global_list_init;
         while (global_list->m_next != NULL) {
             global_list = global_list->m_next;
         }
@@ -228,7 +228,7 @@ size_t _get_blocks_info(BlockInfo b) {
     size_t alloc_block_counter = 0;
     size_t alloc_bytes_counter = 0;
 
-    global_list = global_list_init;
+    global_list = (Meta_Data*)global_list_init;
     while (global_list != NULL) {
         if (global_list->m_is_free) {
             free_block_counter++;
