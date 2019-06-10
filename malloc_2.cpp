@@ -200,3 +200,83 @@ size_t _num_meta_data_bytes() {
 size_t _size_meta_data() {
     return META_SIZE;
 }
+
+void malloc2_test_01() {
+
+    // malloc
+    int *ten = (int *) malloc(sizeof(int) * 10);
+    assert(ten);
+    for (int i = 0; i < 10; i++) {
+        ten[i] = 10;
+    }
+    int *five = (int *) malloc(sizeof(int) * 5);
+    assert(five);
+    for (int i = 0; i < 5; i++) {
+        five[i] = 5;
+    }
+
+    for (int i = 0; i < 10; i++) {
+        assert(ten[i] == 10);
+    }
+    for (int i = 0; i < 5; i++) {
+        assert(five[i] == 5);
+    }
+
+    // calloc
+    int *three = (int *) calloc(3, sizeof(int));
+    assert(three);
+    for (int i = 0; i < 3; i++) {
+        assert(three[i] == 0);
+    }
+
+    // helpers
+    assert(_num_free_blocks() == 0);
+    assert(_num_free_bytes() == 0);
+    assert(_num_allocated_blocks() == 3);
+    assert(_num_allocated_bytes() == sizeof(int) * 18);
+    assert(_num_meta_data_bytes() == _size_meta_data() * 3);
+
+    // realloc
+    int *ninety = (int *) realloc(ten, sizeof(int) * 90);
+    for (int i = 0; i < 90; i++) {
+        ninety[i] = 90;
+    }
+    assert(ninety);
+    assert(_num_free_blocks() == 1);
+    assert(_num_free_bytes() == sizeof(int) * 10);
+    assert(_num_allocated_blocks() == 4);
+    assert(_num_allocated_bytes() == sizeof(int) * 108);
+    assert(_num_meta_data_bytes() == _size_meta_data() * 4);
+
+    int *sixty = (int *) realloc(NULL, sizeof(int) * 60);
+    assert(sixty);
+    assert(_num_free_blocks() == 1);
+    assert(_num_free_bytes() == sizeof(int) * 10);
+    assert(_num_allocated_blocks() == 5);
+    assert(_num_allocated_bytes() == sizeof(int) * 168);
+    assert(_num_meta_data_bytes() == _size_meta_data() * 5);
+
+    // order so far: ten(freed), five, three, ninety, sixty
+    // free & malloc
+    free(ninety);
+    int *eleven = (int *) malloc(sizeof(int) * 11);
+    assert(eleven == ninety);
+    for (int i = 0; i < 11; i++) {
+        eleven[i] = 11;
+    }
+    for (int i = 11; i < 90; i++) {
+        assert(ninety[i] == 90);
+    }
+
+    // order so far: ten(freed), five, three, ninety(eleven), sixty
+    assert(_num_free_blocks() == 1);
+    assert(_num_free_bytes() == sizeof(int) * 10);
+    assert(_num_allocated_blocks() == 5);
+    assert(_num_allocated_bytes() == sizeof(int) * 168);
+    assert(_num_meta_data_bytes() == _size_meta_data() * 5);
+}
+
+int main() {
+    malloc2_test_01();
+    return 0;
+}
