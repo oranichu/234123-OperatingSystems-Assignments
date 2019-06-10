@@ -1,7 +1,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <string.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <assert.h>
 
 typedef struct Meta_Data_t {
