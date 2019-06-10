@@ -682,4 +682,5 @@ int main() {
     malloc3_test_02();
     malloc3_test_03();
     oran();
+    return 0;
 }
