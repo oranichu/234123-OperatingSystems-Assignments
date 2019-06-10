@@ -279,9 +279,6 @@ size_t _size_meta_data() {
 }
 
 void oran() {
-
-    global_list_init = NULL;
-
     assert(malloc(0) == NULL);
     assert(malloc(MAX_MALLOC_SIZE + 1) == NULL);
 
@@ -472,9 +469,6 @@ void oran() {
 }
 
 void malloc3_test_01() {
-
-    global_list_init = NULL;
-
     // malloc
     int *ten = (int *) malloc(sizeof(int) * 10);
     assert(ten);
@@ -565,9 +559,6 @@ void malloc3_test_01() {
 }
 
 void malloc3_test_02() {
-
-    global_list_init = NULL;
-
     long long *tens[11];
 
     for (int i = 10; i < 101; i += 10) {
@@ -621,9 +612,6 @@ void malloc3_test_02() {
 }
 
 void malloc3_test_03() {
-
-    global_list_init = NULL;
-
     assert(_num_meta_data_bytes() % 4 == 0); // problem 3 check
 
     void *huge = (void *) malloc(1000);
@@ -685,8 +673,11 @@ void malloc3_test_03() {
 int main() {
     global_list_init = NULL;
     malloc3_test_01();
+    global_list_init = NULL;
     malloc3_test_02();
+    global_list_init = NULL;
     malloc3_test_03();
+    global_list_init = NULL;
     oran();
     return 0;
 }
