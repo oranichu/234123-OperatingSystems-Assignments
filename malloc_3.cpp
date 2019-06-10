@@ -278,7 +278,6 @@ size_t _size_meta_data() {
     return META_SIZE;
 }
 
-/*
 int main() {
 
     global_list_init = NULL;
@@ -474,4 +473,3 @@ int main() {
 
     return 0;
 }
-*/
