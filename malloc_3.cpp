@@ -276,8 +276,9 @@ void *realloc(void *oldp, size_t size) {
             meta_beginning->m_init_allocation = new_size;
             meta_beginning->m_requested_allocation = size;
             meta_beginning->m_next = meta_next->m_next;
-            meta_next->m_next->m_prev = meta_beginning;
-
+            if (meta_next->m_next != NULL) {
+                meta_next->m_next->m_prev = meta_beginning;
+            }
             // check if remaining part is splitable.
             if (meta_beginning->m_init_allocation - size - META_SIZE >= LARGE_ENOUGH_SIZE) {
 
