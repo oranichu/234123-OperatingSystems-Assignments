@@ -91,7 +91,7 @@ void *calloc(size_t num, size_t size) {
     }
 
     // set to zero
-    memset(ptr, 0, size);
+    memset(ptr, 0, size * num);
     return ptr;
 
 }

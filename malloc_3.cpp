@@ -1,7 +1,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <string.h>
-#include <cstdlib>
+#include <stdlib>
 
 typedef struct Meta_Data_t {
 
@@ -185,7 +185,7 @@ void *calloc(size_t num, size_t size) {
     }
 
     // set to zero
-    memset(ptr, 0, size);
+    memset(ptr, 0, size * num);
     return ptr;
 
 }
