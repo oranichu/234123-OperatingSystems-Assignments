@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include <string.h>
 #include <cstdlib>
-#include <assert.h>
 
 typedef struct Meta_Data_t {
 
@@ -270,7 +269,6 @@ void *realloc(void *oldp, size_t size) {
     Meta_Data *meta_next = meta_beginning->m_next;
 
     if (meta_next->m_is_free) {
-        // TODO: make tests for this.
         size_t new_size =
                 meta_beginning->m_init_allocation + META_SIZE + meta_next->m_init_allocation;
         if (new_size >= size) {

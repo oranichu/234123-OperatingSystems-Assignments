@@ -17,11 +17,3 @@ void* malloc(size_t size) {
     return prev_program_break;
 
 }
-
-int main() {
-    assert(malloc(0) == NULL);
-    assert(malloc(MAX_MALLOC_SIZE+1) == NULL);
-    void* omer = malloc(100);
-    assert(omer != NULL);
-    return 0;
-}
